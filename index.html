@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nota Note Taking App</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="responsive.css" />
     <!-- Import different icon styles -->
     <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -34,10 +35,12 @@
                 name="note-search"
                 id="note-search"
                 placeholder="Search Notes..."
+                spellcheck="false"
+                autocomplete="off"
               />
-              <button for="note-search" type="submit">
+              <label for="note-search">
                 <span class="material-symbols-outlined"> search </span>
-              </button>
+              </label>
             </form>
           </div>
           <div class="more-cta">
@@ -115,7 +118,9 @@
               data-color="black"
               data-tooltip="Default"
             >
-              <span class="material-symbols-outlined"> deselect </span>
+              <span class="material-symbols-outlined">
+                format_color_reset
+              </span>
             </div>
             <div class="color-box" data-color="rgb(255, 218, 218)"></div>
             <div class="color-box" data-color="rgb(140, 255, 182)"></div>
@@ -167,7 +172,9 @@
                 data-color="black"
                 data-tooltip="Default"
               >
-                <span class="material-symbols-outlined"> deselect </span>
+                <span class="material-symbols-outlined">
+                  format_color_reset</span
+                >
               </div>
               <div class="color-box" data-color="rgb(255, 218, 218)"></div>
               <div class="color-box" data-color="rgb(140, 255, 182)"></div>

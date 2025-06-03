@@ -18,6 +18,7 @@ let elements = {
 
 document.addEventListener("DOMContentLoaded", function () {
   loadNotes(readLocalStorageNotes());
+  initializeSearch();
 });
 
 function cardModeChange(condition) {
@@ -90,34 +91,134 @@ function escapeHTML(str) {
 }
 
 // Search Filter
-let typingTimer; // A timer that controls when to search
-const delay = 500; // Wait 500 milliseconds after the user stops typing
+let typingTimer;
+let currentIconIsSearch = true;
+const delay = 500;
 
-elements.searchInput.addEventListener("input", (e) => {
+// Initialize search functionality
+function initializeSearch() {
+  const searchInput = elements.searchInput;
+  const searchIcon = searchInput.nextElementSibling.querySelector("span");
+
+  // Main search input handler
+  searchInput.addEventListener("input", handleSearchInput);
+
+  // Prevent form submission on Enter
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+    }
+  });
+
+  // Handle clear button clicks with event delegation
+  document.addEventListener("click", handleClearClick);
+}
+
+function handleSearchInput(e) {
   e.preventDefault();
+  e.stopPropagation();
+
   clearTimeout(typingTimer);
   typingTimer = setTimeout(performSearch, delay);
+}
 
-  function performSearch() {
-    let noteHistory = readLocalStorageNotes();
-    let filterNotes = []; // reset the filtered notes
-    let currentQuery = document
-      .querySelector("#note-search")
-      .value.toLowerCase()
-      .trim();
+function performSearch() {
+  const searchInput = document.querySelector("#note-search");
+  const searchIcon = searchInput.nextElementSibling.querySelector("span");
+  const currentQuery = searchInput.value.toLowerCase().trim();
+  const noteHistory = readLocalStorageNotes();
 
-    noteHistory.forEach((card, index) => {
-      if (
-        card.title.toLowerCase().search(currentQuery) != -1 ||
-        card.content.toLowerCase().search(currentQuery) != -1
-      ) {
-        filterNotes.splice(0, 0, noteHistory[index]);
-      }
+  // Handle icon switching
+  handleIconSwitch(searchIcon, currentQuery);
+
+  // Filter and load notes
+  const filteredNotes = filterNotesByQuery(noteHistory, currentQuery);
+  loadNotes(currentQuery === "" ? noteHistory : filteredNotes);
+}
+
+function handleIconSwitch(searchIcon, query) {
+  const shouldShowSearch = query === "";
+
+  // Only animate if icon state needs to change
+  if (shouldShowSearch && !currentIconIsSearch) {
+    animateIconChange(searchIcon, "search", () => {
+      searchIcon.parentElement.classList.remove("clear-search");
+      currentIconIsSearch = true;
     });
-
-    loadNotes(filterNotes);
+  } else if (!shouldShowSearch && currentIconIsSearch) {
+    animateIconChange(searchIcon, "close", () => {
+      searchIcon.parentElement.classList.add("clear-search");
+      currentIconIsSearch = false;
+    });
   }
-});
+}
+
+function animateIconChange(icon, newIcon, callback) {
+  gsap.to(icon, {
+    duration: 0.2,
+    opacity: 0,
+    scale: 0.8,
+    rotate: newIcon === "search" ? -45 : 45,
+    ease: "power2.in",
+    onComplete: () => {
+      icon.textContent = newIcon;
+      callback();
+
+      gsap.fromTo(
+        icon,
+        { opacity: 0, scale: 0.8, rotate: newIcon === "search" ? 45 : -45 },
+        {
+          duration: 0.2,
+          opacity: 1,
+          scale: 1,
+          rotate: 0,
+          ease: "power2.out",
+        }
+      );
+    },
+  });
+}
+
+function filterNotesByQuery(notes, query) {
+  if (!query) return notes;
+
+  return notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(query) ||
+      note.content.toLowerCase().includes(query)
+  );
+}
+
+function handleClearClick(e) {
+  // Use event delegation to handle dynamically added clear buttons
+  if (e.target.closest(".clear-search")) {
+    e.preventDefault();
+    e.stopPropagation();
+    clearSearchField();
+  }
+}
+
+function clearSearchField() {
+  const searchInput = document.querySelector("#note-search");
+
+  if (searchInput) {
+    // Clear and focus with animation
+    gsap.to(searchInput, {
+      duration: 0.1,
+      scale: 0.98,
+      yoyo: true,
+      repeat: 1,
+      ease: "power2.inOut",
+      onComplete: () => {
+        searchInput.value = "";
+        searchInput.focus();
+
+        // Trigger search to reset results and icon
+        performSearch();
+      },
+    });
+  }
+}
 
 // Read Note from local storage
 function readLocalStorageNotes() {
@@ -201,9 +302,6 @@ function saveNote() {
   loadNotes(readLocalStorageNotes());
   addModal.classList.remove("active");
   document.body.classList.remove("modal-open");
-
-  // Optional: Show success message
-  console.log("Note saved successfully!");
 }
 
 function resetInputField() {
@@ -262,7 +360,7 @@ document.querySelectorAll(".color-box").forEach((colorBox) => {
       box.style.outlineColor = "";
     });
     // Add active class to clicked color box
-    colorBox.style.outlineColor = colorBox.dataset.color;
+    colorBox.style.outlineColor = "black";
     colorBox.classList.add("active");
   });
 });
@@ -273,25 +371,25 @@ elements.noteSaveBtn.addEventListener("click", (e) => {
   saveNote();
 });
 
-// Loading Notes to the DOM
 function loadNotes(Notes) {
   const noteHistory = Notes;
-
   const pinnedNotes = noteHistory.filter((note) => note.pinned);
   const unpinnedNotes = noteHistory.filter((note) => !note.pinned);
 
-  // Animate existing cards out before clearing
-  const allCards = document.querySelectorAll(".cards"); // ensure your cards have this class
+  // Animate existing cards out
+  const allCards = document.querySelectorAll(".cards");
+
   if (allCards.length > 0) {
     gsap.to(allCards, {
-      x: -50,
       opacity: 0,
+      y: -20,
       duration: 0.3,
       stagger: 0.05,
+      ease: "power2.in",
       onComplete: () => renderCards(),
     });
   } else {
-    renderCards(); // if nothing to animate
+    renderCards();
   }
 
   function renderCards() {
@@ -326,26 +424,29 @@ function loadNotes(Notes) {
 
     // Animate new cards in
     const newCards = document.querySelectorAll(".cards");
+
     gsap.fromTo(
       newCards,
-      { opacity: 0, x: 100, rotationY: 15 },
+      { opacity: 0, y: 20 },
       {
         opacity: 1,
-        x: 0,
-        rotationY: 0,
-        duration: 0.5,
+        y: 0,
+        duration: 0.4,
         stagger: 0.1,
-        ease: "power3.out",
+        ease: "power2.out",
+        delay: 0.1,
       }
     );
 
-    // Restore all functionality
-    pinToggle();
-    editNotes();
-    deleteNotes();
-    coloringCardButton();
-    editCardBG();
-    modeSetup();
+    // Restore functionality
+    gsap.delayedCall(0.6, () => {
+      pinToggle();
+      editNotes();
+      deleteNotes();
+      coloringCardButton();
+      editCardBG();
+      modeSetup();
+    });
   }
 }
 
@@ -444,7 +545,7 @@ function editCardBG() {
             colorBoxes.forEach((colorBox) => {
               const boxColor = colorBox.dataset.color;
               if (boxColor == currentCardColor)
-                colorBox.style.outlineColor = currentCardColor;
+                colorBox.style.outlineColor = "black";
               if (
                 currentCardColor == "rgb(255, 255, 255)" &&
                 boxColor == "black"
@@ -470,7 +571,7 @@ function editCardBG() {
                   colorBoxes.forEach((box) => (box.style.outline = ""));
 
                   // Highlight the selected color box
-                  colorBox.style.outline = `1px solid ${selectedColor}`;
+                  colorBox.style.outline = `1px solid black`;
 
                   let noteHistory = readLocalStorageNotes();
                   let currentIndex = noteHistory.findIndex(
@@ -648,7 +749,7 @@ function editNotes() {
           const boxColor = colorBox.dataset.color;
           if (boxColor === selectedColor) {
             colorBox.classList.add("active");
-            colorBox.style.outlineColor = selectedColor;
+            colorBox.style.outlineColor = "black";
           } else {
             colorBox.classList.remove("active", "default");
             colorBox.style.outlineColor = "";
@@ -817,7 +918,7 @@ function loadCards(card) {
 
                   <div class="new-color-btn">
                     <div class="card-color-box default" data-color="black" data-tooltip="Default">
-                      <span class="material-symbols-outlined"> deselect </span>
+                      <span class="material-symbols-outlined"> format_color_reset </span>
                     </div>
                     <div
                       class="card-color-box"

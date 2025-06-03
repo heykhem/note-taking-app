@@ -1,0 +1,23 @@
+@media screen and (max-width: 1245px) {
+  .container {
+    padding: 0 30px;
+  }
+}
+
+@media screen and (max-width: 638px) {
+  .nav-bar {
+    gap: 25px;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .cards {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .new-note-modal {
+    padding: 0 20px;
+  }
+}
