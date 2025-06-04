@@ -999,3 +999,15 @@ function formatNoteTime(createdAt, updatedAt, showYear = true) {
   // If neither is passed, return empty string
   return "";
 }
+
+// Device Detection
+function isMobileDevice() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+if (isMobileDevice()) {
+  document.body.classList.add("mobile-device");
+  console.log("Mobile device detected");
+} else {
+  console.log("Desktop device detected");
+}
