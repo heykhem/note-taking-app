@@ -10,14 +10,48 @@
   }
 }
 
+@media screen and (max-width: 418px) {
+  .view-card-options,
+  .add-modal-body {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 30px;
+  }
+
+  .modal-color-box {
+    width: 100%;
+  }
+
+  .view-card-close,
+  .modal-save {
+    width: 100%;
+    padding: 15px;
+  }
+}
+
 @media screen and (max-width: 360px) {
   .cards {
     width: 100%;
   }
+
+  .delete-card-modal {
+    padding: 0 20px;
+  }
+
+  .del-modal {
+    padding: 20px;
+  }
+
+  .logo-box h1 {
+    font-size: 1.4rem;
+  }
 }
 
 @media screen and (max-width: 600px) {
-  .new-note-modal {
+  .new-note-modal,
+  .view-card-modal {
     padding: 0 20px;
   }
 }

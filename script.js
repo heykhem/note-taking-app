@@ -1009,5 +1009,6 @@ if (isMobileDevice()) {
   document.body.classList.add("mobile-device");
   console.log("Mobile device detected");
 } else {
+  document.body.classList.remove("mobile-device");
   console.log("Desktop device detected");
 }

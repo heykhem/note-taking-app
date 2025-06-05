@@ -1,5 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap");
-
 * {
   margin: 0;
   padding: 0;
@@ -100,7 +99,6 @@ body {
 }
 
 .logo-box h1 {
-  font-family: "Sora", sans-serif;
   font-size: 1.8rem;
   transition: all 0.3s ease;
 }
@@ -192,13 +190,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 10px;
+  padding: 8px 16px;
   border-radius: 8px;
   outline: none;
   border: none;
   cursor: pointer;
-  background-color: var(--btn-hover-color);
+  background-color: #000;
+  color: #fff;
   font-size: 14px;
+}
+
+.btn:hover {
+  background-color: var(--btn-light-color);
 }
 
 /* ///////////////////////// */
@@ -531,9 +534,6 @@ body.modal-open {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--light-border-color);
 }
 
 .modal-color-btn {
@@ -577,7 +577,14 @@ body.modal-open {
 
 .modal-save {
   border-radius: 10px;
-  padding: 8px 22px;
+  padding: 10px 22px;
+  background-color: #000000;
+  color: #fff;
+  transition: all 0.3s ease-in-out;
+}
+
+.modal-save:hover {
+  background-color: var(--btn-light-color);
 }
 
 /* VIEW MODAL */
